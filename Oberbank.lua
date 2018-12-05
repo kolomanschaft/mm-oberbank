@@ -32,7 +32,7 @@ function InitializeSession (protocol, bankCode, username, username2, password, u
         loginForm:xpath(passwordInputXPath):attr("value", password)
 
         print("Logging in...")
-        
+
         mainPage = HTML(connection:request(submitButton:click()))
 
         local welcomeDiv = mainPage:xpath(welcomeDivXPath)
@@ -173,3 +173,5 @@ function AmountStringToNumber(amountString)
         resultStr = string.gsub(resultStr, ",", ".")
         return tonumber(resultStr)
 end
+
+-- SIGNATURE: MC0CFGSk2qehxjhq+B9UoVPpr0O2kIj5AhUAl8tE/nMDJjg7UmCsD5IKfjsDkQg=
