@@ -1,4 +1,4 @@
-WebBanking{version     = 0.1,
+WebBanking{version     = 0.2,
            url         = "https://www.banking-oberbank.at/",
            services    = {"Oberbank"},
            description = "Extension für das Kundenportal der österreichischen Oberbank"}
@@ -7,6 +7,13 @@ local connection = nil
 local mainPage = nil
 local logoutLink = nil
 local oberbankBic = "OBKLAT2L"
+
+local loginFormXPath = "//*[@id='_loginportlet_WAR_loginportlet_']/div[1]/div[1]/div[1]/form"
+local submitButtonXPath = "div[3]/div[1]/input"
+local usernameInputXPath = "div[1]/div[1]/div[1]/div[1]/input"
+local passwordInputXPath = "div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/input"
+local welcomeDivXPath = "//div[@id='_welcomeportlet_WAR_configurationportlet_']"
+local logoutLinkXPath = "//div[@id='_headerportletobk_WAR_headerportlet_']/a"
 
 function SupportsBank (protocol, bankCode)
   return protocol == ProtocolWebBanking and bankCode == "Oberbank"
@@ -18,22 +25,22 @@ function InitializeSession (protocol, bankCode, username, username2, password, u
         print("Loading login page: " .. url)
 
         local loginPage = HTML(connection:get(url))
-        local loginForm = loginPage:xpath("//*[@id='_loginportlet_WAR_loginportlet_']/div[1]/div[1]/article/form")
-        local submitButton = loginForm:xpath("div/div/div/div[3]/input")
+        local loginForm = loginPage:xpath(loginFormXPath)
+        local submitButton = loginForm:xpath(submitButtonXPath)
 
-        loginForm:xpath("div/div/div/div[1]/input"):attr("value", username)
-        loginForm:xpath("div/div/div/div[2]/div[1]/input"):attr("value", password)
+        loginForm:xpath(usernameInputXPath):attr("value", username)
+        loginForm:xpath(passwordInputXPath):attr("value", password)
 
         print("Logging in...")
-
+        
         mainPage = HTML(connection:request(submitButton:click()))
 
-        local welcomeDiv = mainPage:xpath("//div[@id='_welcomeportlet_WAR_configurationportlet_']")
+        local welcomeDiv = mainPage:xpath(welcomeDivXPath)
         if welcomeDiv:length() == 0 then
                 return "Login failed. First check your credentials. Then try logging in on the browser, there might be an information page you have to confirm before you can login."
         end
 
-        logoutLink = mainPage:xpath("//div[@id='_headerportletobk_WAR_headerportlet_']/a")
+        logoutLink = mainPage:xpath(logoutLinkXPath)
 
         return nil
 end
@@ -166,5 +173,3 @@ function AmountStringToNumber(amountString)
         resultStr = string.gsub(resultStr, ",", ".")
         return tonumber(resultStr)
 end
-
--- SIGNATURE: MC0CFQCCKQlk4nfbxwoXQgx1WpA6aLgRPgIUOIy93zm9LCKhNofoM1mqIFZi88o=
